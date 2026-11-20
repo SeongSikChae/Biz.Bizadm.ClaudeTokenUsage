@@ -1,4 +1,4 @@
-import { clampFrom, defaultPeriod, isoToKstWall, kstWallToIso } from "./periods";
+import { clampFrom, defaultPeriod, isoToKstWall, kstWallToIso, shiftPeriodToNow } from "./periods";
 import type { UsageUnit } from "./types";
 
 const NOW = "2026-11-20T14:37:12+09:00";
@@ -20,6 +20,26 @@ describe("periods", () => {
   ])("default period for %s ends at the next minute boundary and starts at %s", (unit, from) => {
     // 끝은 14:37이 속한 분의 다음 경계(14:38)라 진행 중인 현재 분이 포함된다.
     expect(defaultPeriod(unit, NOW)).toEqual({ from, to: "2026-11-20T14:38" });
+  });
+
+  it("shifts a period to now keeping its length", () => {
+    // 2시간 30분 기간을 지금(14:37:12)의 다음 분 경계 14:38로 옮긴다.
+    expect(shiftPeriodToNow("2026-11-20T09:00", "2026-11-20T11:30", NOW, null)).toEqual({
+      from: "2026-11-20T12:08",
+      to: "2026-11-20T14:38",
+    });
+    // 같은 분 안에서 다시 옮기면 그대로다.
+    expect(shiftPeriodToNow("2026-11-20T12:08", "2026-11-20T14:38", "2026-11-20T14:37:55+09:00", null)).toEqual({
+      from: "2026-11-20T12:08",
+      to: "2026-11-20T14:38",
+    });
+  });
+
+  it("clamps a shifted period to the retention lower bound", () => {
+    expect(shiftPeriodToNow("2026-11-10T00:00", "2026-11-20T00:00", NOW, "2026-11-13T14:00:00+09:00")).toEqual({
+      from: "2026-11-13T14:00",
+      to: "2026-11-20T14:38",
+    });
   });
 
   it("clamps start to the retention lower bound", () => {

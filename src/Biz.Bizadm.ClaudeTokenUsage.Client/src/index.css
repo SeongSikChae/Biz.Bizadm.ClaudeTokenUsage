@@ -16,11 +16,6 @@
     --color-sidebar-primary: var(--sidebar-primary);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -49,7 +44,7 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
+    --background: oklch(0.975 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -67,11 +62,18 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    /* ECharts에 넘기는 색은 hex로 둔다. zrender 색 해석기가 oklch를 읽지 못해 강조색 계산이 깨지기 때문이다. */
+    --series-1: #2563eb;
+    --series-2: #f97316;
+    --series-3: #0d9488;
+    --series-4: #9333ea;
+    --series-5: #e11d48;
+    --series-6: #65a30d;
+    --series-7: #ca8a04;
+    --series-8: #0891b2;
+    --chart-cost: #475569;
+    --chart-axis: #737373;
+    --chart-grid: #e5e5e5;
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
@@ -84,6 +86,8 @@
 }
 
 .dark {
+    /* 날짜 입력의 달력 아이콘처럼 브라우저 기본 컨트롤도 어두운 테마로 그린다. */
+    color-scheme: dark;
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
@@ -102,11 +106,17 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    --series-1: #60a5fa;
+    --series-2: #fb923c;
+    --series-3: #2dd4bf;
+    --series-4: #c084fc;
+    --series-5: #fb7185;
+    --series-6: #a3e635;
+    --series-7: #facc15;
+    --series-8: #22d3ee;
+    --chart-cost: #cbd5e1;
+    --chart-axis: #a3a3a3;
+    --chart-grid: #333333;
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);

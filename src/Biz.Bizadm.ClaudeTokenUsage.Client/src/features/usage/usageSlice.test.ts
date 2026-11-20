@@ -1,7 +1,8 @@
 import { createStore } from "@/app/store";
-import { buildSeriesParams } from "./api";
+import { buildSeriesParams, TIMEOUT_MESSAGE } from "./api";
 import { sampleMeta, sampleSeries } from "./testData";
-import reducer, { loadMeta, loadSeries, setGroupBy, setPeriod, setUnit, toggleFilter } from "./usageSlice";
+import type { UsageFilters, UsageSeries } from "./types";
+import reducer, { loadMeta, loadSeries, refresh, setGroupBy, setLive, setPeriod, setUnit, toggleFilter, toggleHidden } from "./usageSlice";
 
 describe("usageSlice", () => {
   afterEach(() => {
@@ -62,5 +63,100 @@ describe("usageSlice", () => {
     expect(store.getState().usage.series?.groupBy).toBe("model");
     expect(store.getState().usage.series?.totals.tokens).toBe(2);
     expect(store.getState().usage.status).toBe("idle");
+  });
+
+  const filters = reducer(undefined, { type: "init" }).filters;
+  const fulfilled = (series: UsageSeries, arg: UsageFilters = filters, requestId = "r1") => loadSeries.fulfilled(series, requestId, arg);
+  const pending = (arg: UsageFilters = filters, requestId = "r1") => loadSeries.pending(requestId, arg);
+
+  it("starts live and stops live when the period is chosen", () => {
+    let state = reducer(undefined, { type: "init" });
+    expect(state.live).toBe(true);
+    state = reducer(state, setPeriod({ from: "2026-11-20T10:00", to: "2026-11-20T12:00" }));
+    expect(state.live).toBe(false);
+  });
+
+  it("refresh shifts the period to now only when live and always bumps the sequence", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-20T14:37:12+09:00"));
+    let state = reducer(undefined, setPeriod({ from: "2026-11-20T09:00", to: "2026-11-20T11:00" }));
+    state = reducer(state, refresh());
+    expect(state.filters).toMatchObject({ from: "2026-11-20T09:00", to: "2026-11-20T11:00" });
+    expect(state.refreshSeq).toBe(1);
+
+    state = reducer(state, setLive(true)); // 켜면 곧바로 옮기고 한 번 조회
+    expect(state.filters).toMatchObject({ from: "2026-11-20T12:38", to: "2026-11-20T14:38" });
+    expect(state.refreshSeq).toBe(2);
+
+    vi.setSystemTime(new Date("2026-11-20T14:45:00+09:00"));
+    state = reducer(state, refresh());
+    expect(state.filters).toMatchObject({ from: "2026-11-20T12:46", to: "2026-11-20T14:46" });
+    expect(state.refreshSeq).toBe(3);
+
+    state = reducer(state, setLive(false));
+    expect(state.live).toBe(false);
+    expect(state.refreshSeq).toBe(3);
+  });
+
+  it("records the last success time and keeps it and the error until the next success", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-20T05:00:00Z"));
+    let state = reducer(undefined, pending());
+    state = reducer(state, fulfilled(sampleSeries));
+    expect(state.lastSuccessAt).toBe("2026-11-20T05:00:00.000Z");
+
+    vi.setSystemTime(new Date("2026-11-20T05:00:10Z"));
+    state = reducer(state, pending(filters, "r2"));
+    state = reducer(state, loadSeries.rejected(new Error("서버 오류"), "r2", filters));
+    expect(state.error).toBe("서버 오류");
+    expect(state.lastSuccessAt).toBe("2026-11-20T05:00:00.000Z");
+
+    state = reducer(state, pending(filters, "r3"));
+    expect(state.error).toBe("서버 오류"); // 요청을 보낼 때는 지우지 않는다
+    state = reducer(state, fulfilled(sampleSeries, filters, "r3"));
+    expect(state.error).toBeNull();
+    expect(state.lastSuccessAt).toBe("2026-11-20T05:00:10.000Z");
+  });
+
+  it("reports a request timeout as an error", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new DOMException("signal timed out", "TimeoutError"))));
+    const store = createStore();
+    await store.dispatch(loadSeries(store.getState().usage.filters));
+    expect(store.getState().usage.error).toBe(TIMEOUT_MESSAGE);
+  });
+
+  it("keeps colors across refreshes and reassigns them when grouping or filters change", () => {
+    const first = { ...sampleSeries, series: ["input", "output"] };
+    let state = reducer(undefined, pending());
+    state = reducer(state, fulfilled(first));
+    expect(state.colorIndex).toEqual({ input: 0, output: 1 });
+
+    // 기간만 바뀐 갱신: 색을 유지하고 앞에 끼어든 새 계열은 빈 색을 받는다.
+    const shifted = { ...filters, from: "2026-11-20T00:00" };
+    state = reducer(state, pending(shifted, "r2"));
+    state = reducer(state, fulfilled({ ...sampleSeries, series: ["cacheRead", "input", "output"] }, shifted, "r2"));
+    expect(state.colorIndex).toEqual({ cacheRead: 2, input: 0, output: 1 });
+
+    // 나눠 볼 기준이 바뀌면 응답 순서대로 다시 매긴다.
+    const byModel = { ...filters, groupBy: "model" as const };
+    state = reducer(state, pending(byModel, "r3"));
+    state = reducer(state, fulfilled({ ...sampleSeries, series: ["m1", "m2"] }, byModel, "r3"));
+    expect(state.colorIndex).toEqual({ m1: 0, m2: 1 });
+
+    // 필터가 바뀌어도 다시 매긴다.
+    const filtered = { ...byModel, users: ["a@example.com"] };
+    state = reducer(state, pending(filtered, "r4"));
+    state = reducer(state, fulfilled({ ...sampleSeries, series: ["m2"] }, filtered, "r4"));
+    expect(state.colorIndex).toEqual({ m2: 0 });
+  });
+
+  it("toggles hidden series by name and keeps them across responses", () => {
+    let state = reducer(undefined, toggleHidden("output"));
+    expect(state.hidden).toEqual(["output"]);
+    state = reducer(state, pending());
+    state = reducer(state, fulfilled({ ...sampleSeries, series: ["input"] }));
+    expect(state.hidden).toEqual(["output"]);
+    state = reducer(state, toggleHidden("output"));
+    expect(state.hidden).toEqual([]);
   });
 });

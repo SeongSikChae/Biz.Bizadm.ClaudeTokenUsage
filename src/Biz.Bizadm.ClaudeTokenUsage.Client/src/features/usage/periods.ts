@@ -29,9 +29,7 @@ export function kstWallToIso(wall: string): string {
  * 끝은 지금이 속한 분의 다음 분 경계로 올려, 진행 중인 현재 구간이 들어가게 한다.
  */
 export function defaultPeriod(unit: UsageUnit, nowIso: string): { from: string; to: string } {
-  const end = wallToDate(isoToKstWall(nowIso));
-  end.setUTCMinutes(end.getUTCMinutes() + 1);
-  const to = dateToWall(end);
+  const to = nextMinuteBoundary(nowIso);
   const from = wallToDate(to);
   switch (unit) {
     case "minute":
@@ -61,4 +59,27 @@ export function clampFrom(from: string, earliestIso: string | null | undefined):
   if (!earliestIso) return from;
   const earliest = isoToKstWall(earliestIso);
   return from < earliest ? earliest : from;
+}
+
+/** 지금이 속한 분의 다음 분 경계(KST 벽시계). 진행 중인 현재 구간이 기간에 들어가게 한다. */
+function nextMinuteBoundary(nowIso: string): string {
+  const end = wallToDate(isoToKstWall(nowIso));
+  end.setUTCMinutes(end.getUTCMinutes() + 1);
+  return dateToWall(end);
+}
+
+/**
+ * 실시간 갱신용으로 기간을 지금 기준으로 옮긴다. 끝은 지금이 속한 분의 다음 분 경계,
+ * 시작은 끝에서 옮기기 전 기간 길이만큼 앞이며 보관 하한보다 이르면 하한으로 자른다.
+ */
+export function shiftPeriodToNow(
+  from: string,
+  to: string,
+  nowIso: string,
+  earliestIso: string | null | undefined,
+): { from: string; to: string } {
+  const length = wallToDate(to).getTime() - wallToDate(from).getTime();
+  const newTo = nextMinuteBoundary(nowIso);
+  const newFrom = dateToWall(new Date(wallToDate(newTo).getTime() - length));
+  return { from: clampFrom(newFrom, earliestIso), to: newTo };
 }

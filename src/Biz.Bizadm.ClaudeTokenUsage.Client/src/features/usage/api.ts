@@ -15,8 +15,29 @@ export function buildSeriesParams(filters: UsageFilters): URLSearchParams {
   return params;
 }
 
+/** 조회 시간 제한. 서버가 응답 없이 멈춰도 실패로 보이게 한다. */
+const REQUEST_TIMEOUT_MS = 15_000;
+export const TIMEOUT_MESSAGE = "응답 시간이 초과되었습니다";
+
+function isTimeout(error: unknown): boolean {
+  return (error as { name?: unknown } | null)?.name === "TimeoutError";
+}
+
 async function getJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
+  try {
+    return await requestJson<T>(url);
+  } catch (error) {
+    // 시간 제한 신호는 응답 본문을 읽는 중에도 걸리므로 본문 읽기까지 함께 감싼다.
+    if (isTimeout(error)) throw new Error(TIMEOUT_MESSAGE);
+    throw error;
+  }
+}
+
+async function requestJson<T>(url: string): Promise<T> {
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
   if (!response.ok) {
     let detail = `${response.status} ${response.statusText}`;
     try {

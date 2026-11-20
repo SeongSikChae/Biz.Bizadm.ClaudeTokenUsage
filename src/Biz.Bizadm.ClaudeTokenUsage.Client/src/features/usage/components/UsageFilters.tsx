@@ -21,7 +21,7 @@ function CheckList({ title, list, options }: { title: string; list: ListFilter; 
         return (
           <div key={option} className="flex items-center gap-2">
             <Checkbox id={id} checked={selected.includes(option)} onCheckedChange={() => dispatch(toggleFilter({ list, value: option }))} />
-            <Label htmlFor={id} className="font-normal">
+            <Label htmlFor={id} className="min-w-0 font-normal break-all">
               {option}
             </Label>
           </div>
@@ -57,22 +57,24 @@ export function UsageFilters() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5">
+        <div className="w-full space-y-1.5 sm:w-auto">
           <Label htmlFor="from">시작 (KST)</Label>
           <Input
             id="from"
             type="datetime-local"
+            className="w-full sm:w-auto"
             value={filters.from}
             min={min}
             max={filters.to}
             onChange={(event) => event.target.value && dispatch(setPeriod({ from: event.target.value, to: filters.to }))}
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="w-full space-y-1.5 sm:w-auto">
           <Label htmlFor="to">끝 (KST)</Label>
           <Input
             id="to"
             type="datetime-local"
+            className="w-full sm:w-auto"
             value={filters.to}
             min={filters.from}
             onChange={(event) => event.target.value && dispatch(setPeriod({ from: filters.from, to: event.target.value }))}
