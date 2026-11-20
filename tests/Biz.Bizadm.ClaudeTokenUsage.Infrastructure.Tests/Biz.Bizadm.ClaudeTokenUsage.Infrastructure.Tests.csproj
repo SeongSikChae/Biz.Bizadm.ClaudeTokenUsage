@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="MSTest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Biz.Bizadm.ClaudeTokenUsage.Infrastructure\Biz.Bizadm.ClaudeTokenUsage.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

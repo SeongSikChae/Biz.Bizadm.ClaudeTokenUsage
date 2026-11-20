@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Biz.Bizadm.ClaudeTokenUsage.Infrastructure.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DuckDB.NET.Data.Full" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- opentelemetry-proto v1.11.1 (Apache-2.0). 메시지 타입만 생성한다. -->
+    <Protobuf Include="Protos\**\*.proto" ProtoRoot="Protos" GrpcServices="None" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Biz.Bizadm.ClaudeTokenUsage.Core\Biz.Bizadm.ClaudeTokenUsage.Core.csproj" />
+  </ItemGroup>
+
+</Project>

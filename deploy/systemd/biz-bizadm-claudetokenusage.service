@@ -1,0 +1,25 @@
+# systemd 유닛 예시. 경로·계정을 환경에 맞게 바꾼 뒤 /etc/systemd/system/ 에 둔다.
+[Unit]
+Description=Biz.Bizadm.ClaudeTokenUsage (Claude Code token usage collector)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# AddSystemd()가 시작 완료를 sd_notify로 알린다.
+Type=notify
+WorkingDirectory=/opt/biz-bizadm-claudetokenusage
+ExecStart=/opt/biz-bizadm-claudetokenusage/Biz.Bizadm.ClaudeTokenUsage.Server.Spa --config /opt/biz-bizadm-claudetokenusage/config.yaml --log /var/log/biz-bizadm-claudetokenusage
+User=claudetokenusage
+Group=claudetokenusage
+Restart=on-failure
+RestartSec=10
+# 정상 종료(SIGTERM) 시간
+TimeoutStopSec=30
+Environment=DOTNET_NOLOGO=1
+# OsKms KEK 저장소. 서비스에는 데스크톱 키링(Secret Service)이 없으므로 서비스 계정의 gpg 저장소를 쓴다(README "systemd" 참고).
+Environment=GCM_CREDENTIAL_STORE=gpg
+# gpg 저장소는 GPG_TTY가 있어야 한다. 암호 없는 키를 쓰므로 터미널은 쓰지 않는다.
+Environment=GPG_TTY=/dev/null
+
+[Install]
+WantedBy=multi-user.target

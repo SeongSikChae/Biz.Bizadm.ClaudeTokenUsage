@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Biz.Bizadm.ClaudeTokenUsage.Core.Tests" />
+  </ItemGroup>
+
+</Project>

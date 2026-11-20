@@ -1,0 +1,13 @@
+# Biz.Bizadm.ClaudeTokenUsage.Server.Spa 설정 예시. <...>를 환경에 맞게 바꾼다.
+# 최초 기동 시 OsKms.Salt가 기록되고, TLS를 쓰면 ServerCertificatePassword가 DEKENC: 암호문으로 바뀐다(파일이 다시 쓰여 주석이 사라진다).
+ContentRootPath: <서버 배포 폴더 절대 경로>
+Port: 4318
+WebRootPath: ClientApp
+DatabaseFilePath: data/token-usage.duckdb
+OsKms:
+  CredentialService: https://biz-bizadm-claudetokenusage.local
+  CredentialAccount: claudetokenusage
+  Iterations: <PBKDF2 반복 횟수>
+  SecretsDekFilePath: secrets.dek
+Tls:
+  UseTls: false

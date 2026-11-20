@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Biz.Bizadm.ClaudeTokenUsage.Core\Biz.Bizadm.ClaudeTokenUsage.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,1 +1,14 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Biz.Bizadm.ClaudeTokenUsage.Core/Biz.Bizadm.ClaudeTokenUsage.Core.csproj" />
+    <Project Path="src/Biz.Bizadm.ClaudeTokenUsage.Infrastructure/Biz.Bizadm.ClaudeTokenUsage.Infrastructure.csproj" />
+    <Project Path="src/Biz.Bizadm.ClaudeTokenUsage.Server.Core/Biz.Bizadm.ClaudeTokenUsage.Server.Core.csproj" />
+    <Project Path="src/Biz.Bizadm.ClaudeTokenUsage.Server.Spa/Biz.Bizadm.ClaudeTokenUsage.Server.Spa.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Biz.Bizadm.ClaudeTokenUsage.Core.Tests/Biz.Bizadm.ClaudeTokenUsage.Core.Tests.csproj" />
+    <Project Path="tests/Biz.Bizadm.ClaudeTokenUsage.Infrastructure.Tests/Biz.Bizadm.ClaudeTokenUsage.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Biz.Bizadm.ClaudeTokenUsage.Server.Core.Tests/Biz.Bizadm.ClaudeTokenUsage.Server.Core.Tests.csproj" />
+    <Project Path="tests/Biz.Bizadm.ClaudeTokenUsage.Server.Spa.Tests/Biz.Bizadm.ClaudeTokenUsage.Server.Spa.Tests.csproj" />
+  </Folder>
+</Solution>
