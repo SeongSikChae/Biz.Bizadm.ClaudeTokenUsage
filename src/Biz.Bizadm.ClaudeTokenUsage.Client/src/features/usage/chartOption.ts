@@ -31,8 +31,8 @@ export const COST_SERIES_NAME = "비용 (USD)";
 
 /** 툴팁·확대 슬라이더처럼 ECharts 기본값이 밝은 색인 요소의 테마별 색. */
 const THEME_COLORS: Record<Theme, { tooltipBg: string; tooltipBorder: string; text: string; zoomFill: string; zoomBorder: string }> = {
-  light: { tooltipBg: "#ffffff", tooltipBorder: "#e5e5e5", text: "#171717", zoomFill: "#dbeafe", zoomBorder: "#d4d4d4" },
-  dark: { tooltipBg: "#262626", tooltipBorder: "#404040", text: "#fafafa", zoomFill: "#1e3a5f", zoomBorder: "#404040" },
+  light: { tooltipBg: "#ffffff", tooltipBorder: "#e5e5e5", text: "#171717", zoomFill: "rgba(59, 130, 246, 0.15)", zoomBorder: "#d4d4d4" },
+  dark: { tooltipBg: "#262626", tooltipBorder: "#404040", text: "#fafafa", zoomFill: "rgba(96, 165, 250, 0.2)", zoomBorder: "#404040" },
 };
 
 const GRID_LEFT = 56;
@@ -139,7 +139,10 @@ export function buildChartOption({ data, colorIndex, hidden, palette, theme }: C
         height: 20,
         bottom: 12,
         borderColor: colors.zoomBorder,
+        // 반투명 채움으로 뒤의 미리보기 그래프가 보이게 한다(불투명 hex는 그래프를 가린다).
         fillerColor: colors.zoomFill,
+        // ECharts 5 기본 이동 손잡이(위쪽 막대)는 위로 늘어날 것처럼 보이므로 숨긴다. 이동은 채움 영역 드래그로 한다.
+        moveHandleSize: 0,
         textStyle: { color: palette.axis },
       },
     ],
